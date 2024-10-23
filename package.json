@@ -14,14 +14,18 @@
     "@mui/icons-material": "^6.1.4",
     "@mui/material": "^6.1.4",
     "axios": "^1.7.7",
+    "konva": "^9.3.16",
     "next": "14.2.15",
     "react": "^18",
     "react-dom": "^18",
+    "react-infinite-scroll-component": "^6.1.0",
     "react-konva": "^18.2.10",
-    "react-query": "^3.39.3"
+    "react-query": "^3.39.3",
+    "use-image": "^1.1.1"
   },
   "devDependencies": {
     "eslint": "^8",
-    "eslint-config-next": "14.2.15"
+    "eslint-config-next": "14.2.15",
+    "webpack": "^5.95.0"
   }
 }

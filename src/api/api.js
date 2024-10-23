@@ -25,10 +25,18 @@ export const uploadImage = async (newImage) => {
       },
       body: JSON.stringify(newImage),
     });
-    console.log("we are ", response);
+ 
     if (!response.ok) throw new Error('Image upload failed'); 
     return response.json();
   };
+// Add the updateImageDetails function
+export const updateImageDetails = async (updatedImage) => {
+  console.log(updatedImage)
+  const { categoryId, ...rest } = updatedImage;  // Extract the id and other image data
+  const response = await api.put(`/images/${categoryId}`, rest);
+ 
+  return response.data;
+};
 
 // Categories API
 export const fetchCategories = async () => {

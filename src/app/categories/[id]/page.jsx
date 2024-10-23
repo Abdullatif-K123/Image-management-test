@@ -7,8 +7,6 @@ import {
   Typography,
   Snackbar,
   Alert,
-  Button,
-  IconButton,
   Stack,
 } from "@mui/material";
 import ImageCard from "@/components/ImageCard";
@@ -65,7 +63,20 @@ export default function CategoryImagesPage({ params }) {
     deleteMutation.mutate(id);
   };
 
-  if (isLoading) return <CircularProgress />;
+  if (isLoading)
+    return (
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "100vh",
+        }}
+      >
+        {" "}
+        <CircularProgress />
+      </div>
+    );
   if (error)
     return <Typography color="error">Failed to load images.</Typography>;
 
@@ -82,7 +93,19 @@ export default function CategoryImagesPage({ params }) {
     return matchesName && matchesMetadata;
   });
   if (!categories) {
-    return <p>Loading category...</p>;
+    return (
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "100vh",
+        }}
+      >
+        {" "}
+        <CircularProgress />
+      </div>
+    );
   }
   const matchedCategory = categories.find(
     (category) => category.id === Number(categoryId)

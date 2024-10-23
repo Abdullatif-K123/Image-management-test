@@ -1,5 +1,7 @@
 "use client";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "react-query";
+import InfiniteScroll from "react-infinite-scroll-component"; // Import InfiniteScroll component
 import {
   Grid,
   CircularProgress,
@@ -10,13 +12,21 @@ import {
   Button,
   IconButton,
   Stack,
+  TextField,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Select,
 } from "@mui/material";
 import ImageCard from "@/components/ImageCard";
-import { fetchImages, deleteImage, fetchCategories } from "@/api/api";
-import { useState } from "react";
+import {
+  fetchImages,
+  deleteImage,
+  fetchCategories,
+  updateImageDetails,
+} from "@/api/api"; // API imports
 import { AddAPhoto } from "@mui/icons-material";
-import UploadImageModal from "./upload";
-import ImageFilter from "@/components/Filter";
+import UploadImageModal from "./upload"; // Import UploadImageModal component
 
 export default function ImagesPage() {
   const queryClient = useQueryClient();
@@ -27,13 +37,31 @@ export default function ImagesPage() {
   });
   const [openModal, setOpenModal] = useState(false);
   const [localImages, setLocalImages] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [metadataFilter, setMetadataFilter] = useState("");
+  const [searchQuery, setSearchQuery] = useState(""); // For filtering by name
+  const [selectedCategory, setSelectedCategory] = useState(""); // For filtering by category
+  const [metadataFilter, setMetadataFilter] = useState(""); // For metadata filter
+  const [page, setPage] = useState(1); // Track the current page for infinite scrolling
+  const [hasMore, setHasMore] = useState(true); // Determine if there's more data to load
+  const [paginatedImages, setPaginatedImages] = useState([]); // Store paginated images
 
-  const { data: apiImages, isLoading, error } = useQuery("images", fetchImages);
+  const {
+    data: apiImages,
+    isLoading,
+    error,
+  } = useQuery(["images", page], () => fetchImages(page), {
+    keepPreviousData: true, // Ensure previous data stays while fetching new data
+  });
 
   const { data: categories } = useQuery("categories", fetchCategories);
+
+  // Fetch new data when the `apiImages` query updates
+  useEffect(() => {
+    if (apiImages && apiImages.length > 0) {
+      setPaginatedImages((prevImages) => [...prevImages, ...apiImages]); // Append new images to the existing list
+    } else {
+      setHasMore(false); // No more images to load
+    }
+  }, [apiImages]);
 
   const deleteMutation = useMutation(deleteImage, {
     onSuccess: (__, deletedId) => {
@@ -45,6 +73,7 @@ export default function ImagesPage() {
         message: "Image deleted successfully!",
         severity: "success",
       });
+      setSelectedImageForEdit(null);
     },
     onError: () => {
       setSnackbar({
@@ -60,20 +89,31 @@ export default function ImagesPage() {
     deleteMutation.mutate(id);
   };
 
-  const handleSnackbarMessage = (message, severity = "success") => {
-    setSnackbar({ open: true, message, severity });
-  };
-
   const handleLocalImageUpload = (newImage) => {
     setLocalImages((prevImages) => [...prevImages, newImage]);
   };
 
-  if (isLoading) return <CircularProgress />;
+  if (isLoading && page === 1)
+    return (
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "100vh"
+        }}
+      >
+        {" "}
+        <CircularProgress />
+      </div>
+    );
   if (error)
     return <Typography color="error">Failed to load images.</Typography>;
 
-  const allImages = [...(apiImages || []), ...localImages];
+  // Merge API images with local uploaded images
+  const allImages = [...paginatedImages, ...localImages];
 
+  // Function to filter images based on search query, category, and metadata
   const filteredImages = allImages.filter((image) => {
     const matchesName = image.name
       .toLowerCase()
@@ -83,6 +123,11 @@ export default function ImagesPage() {
     const matchesMetadata = image.metadata.size.includes(metadataFilter);
     return matchesName && matchesCategory && matchesMetadata;
   });
+
+  // Load more images when scrolling
+  const fetchMoreImages = () => {
+    setPage((prevPage) => prevPage + 1); // Increment the page number
+  };
 
   return (
     <Container>
@@ -111,23 +156,66 @@ export default function ImagesPage() {
       </Stack>
 
       {/* Filters */}
-      <ImageFilter
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        selectedCategory={selectedCategory}
-        setSelectedCategory={setSelectedCategory}
-        metadataFilter={metadataFilter}
-        setMetadataFilter={setMetadataFilter}
-        categories={categories}
-      />
+      <Stack direction="row" spacing={2} sx={{ marginBottom: 2 }}>
+        <TextField
+          label="Search by Name"
+          variant="outlined"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          fullWidth
+        />
 
-      <Grid container spacing={2}>
-        {filteredImages?.map((image) => (
-          <Grid item xs={12} sm={6} md={4} key={image.id}>
-            <ImageCard image={image} onDelete={handleDelete} />
-          </Grid>
-        ))}
-      </Grid>
+        <FormControl fullWidth>
+          <InputLabel>Category</InputLabel>
+          <Select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+          >
+            <MenuItem value="">
+              <em>All</em>
+            </MenuItem>
+            {categories?.map((category) => (
+              <MenuItem key={category.id} value={category.id}>
+                {category.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <TextField
+          label="Filter by Size"
+          variant="outlined"
+          value={metadataFilter}
+          onChange={(e) => setMetadataFilter(e.target.value)}
+          fullWidth
+        />
+      </Stack>
+
+      {/* Infinite Scroll */}
+      <InfiniteScroll
+        dataLength={filteredImages.length}
+        next={fetchMoreImages}
+        hasMore={hasMore}
+        loader={<CircularProgress />}
+        style={{overflow: "hidden"}}
+        endMessage={
+          <Typography sx={{ textAlign: "center", fontWeight: 500 }}>
+            No more images to show.
+          </Typography>
+        }
+      >
+        <Grid container spacing={2}>
+          {filteredImages?.map((image) => (
+            <Grid item xs={12} sm={6} md={4} key={image.id}>
+              <ImageCard
+                setSnackbar={setSnackbar}
+                image={image}
+                onDelete={handleDelete}
+              />
+            </Grid>
+          ))}
+        </Grid>
+      </InfiniteScroll>
 
       <Snackbar
         open={snackbar.open}
@@ -140,9 +228,8 @@ export default function ImagesPage() {
       <UploadImageModal
         open={openModal}
         onClose={() => setOpenModal(false)}
-        onSuccess={handleSnackbarMessage}
+        onSuccess={handleLocalImageUpload}
         queryClient={queryClient}
-        onImageUpload={handleLocalImageUpload}
       />
     </Container>
   );

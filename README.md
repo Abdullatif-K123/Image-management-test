@@ -1,3 +1,7 @@
+# Averroes Image Management App
+
+This is a simple image management application built with Next.js. Users can upload images, view categories, and perform basic image and category management. This application also demonstrates the use of API interactions, file uploads, and basic CRUD operations.
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
@@ -18,19 +22,69 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Table of Contents
 
-## Learn More
+- [Technologies](#technologies)
+- [Features](#features)
+- [Folder Structure](#folder-structure)
+- [Installation](#installation)
+- [Running the Application](#running-the-application)
+- [API Documentation](#api-documentation)
+- [License](#license)
 
-To learn more about Next.js, take a look at the following resources:
+## Technologies
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Next.js** - React framework for production
+- **Material UI** - React UI framework for building user interfaces
+- **Axios** - Promise-based HTTP client for API requests
+- **React Query** - For server-state management
+- **React Hooks** - Custom hooks for data fetching
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Features
 
-## Deploy on Vercel
+- Image Upload with Category Selection
+- Display Images in a Grid
+- Edit Image Information (Name, Category)
+- Delete Images
+- Fetch Categories from a remote API
+- Responsive Design
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Folder Structure
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```plaintext
+src
+|   404.js               # Custom 404 page
+|
++---api                  # API utilities for interacting with the backend
+|       api.js
+|
++---app                  # Main application and page structure
+|   |   favicon.ico
+|   |   globals.css
+|   |   layout.js        # Layout for the app
+|   |   page.js          # Home page, redirects to the image page
+|   |   page.module.css  # Global CSS styles
+|   |
+|   +---categories       # Category-related pages
+|   |   |   page.js      # List all categories
+|   |   \---[id]         # Dynamic routes for categories
+|   |           page.jsx
+|   |
+|   +---fonts            # Custom font files
+|   |       GeistMonoVF.woff
+|   |       GeistVF.woff
+|   |
+|   \---images           # Image-related pages
+|           page.js      # Image gallery page
+|           upload.js    # Image upload page
+|
++---components           # Reusable React components
+|       EditModal.jsx    # Modal for editing images
+|       Filter.jsx       # Filter component for searching images
+|       ImageCard.jsx    # Card component to display image details
+|       ImageUpload.jsx  # Component to upload images
+|       Navbar.jsx       # Navigation bar
+|
+\---hooks                # Custom hooks for data fetching
+        useCategories.js # Hook to fetch categories
+```

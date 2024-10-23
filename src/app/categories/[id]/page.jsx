@@ -16,6 +16,7 @@ import { fetchImages, deleteImage } from "@/api/api"; // Import delete and fetch
 import { useState } from "react";
 import { AddAPhoto } from "@mui/icons-material";
 import { useCategories } from "@/hooks/useCategories";
+import ImageFilter from "@/components/Filter";
 
 export default function CategoryImagesPage({ params }) {
   const queryClient = useQueryClient();
@@ -26,7 +27,8 @@ export default function CategoryImagesPage({ params }) {
   });
   const [openModal, setOpenModal] = useState(false);
   const [localImages, setLocalImages] = useState([]);
-
+  const [searchQuery, setSearchQuery] = useState("");
+  const [metadataFilter, setMetadataFilter] = useState("");
   const categoryId = params.id; // Use the params object to get the id
 
   // Fetch images with React Query, filtering by categoryId
@@ -72,6 +74,13 @@ export default function CategoryImagesPage({ params }) {
   );
   // Merge filtered API images with local uploaded images
   const allImages = [...filteredApiImages];
+  const filteredImages = allImages.filter((image) => {
+    const matchesName = image.name
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+    const matchesMetadata = image.metadata.size.includes(metadataFilter);
+    return matchesName && matchesMetadata;
+  });
   if (!categories) {
     return <p>Loading category...</p>;
   }
@@ -92,8 +101,17 @@ export default function CategoryImagesPage({ params }) {
         </Typography>
       </Stack>
 
+      {/* Filters */}
+      <ImageFilter
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        metadataFilter={metadataFilter}
+        setMetadataFilter={setMetadataFilter}
+        categories={categories}
+        hideCategory={true}
+      />
       <Grid container spacing={2}>
-        {allImages?.map((image) => (
+        {filteredImages?.map((image) => (
           <Grid item xs={12} sm={6} md={4} key={image.id}>
             <ImageCard image={image} onDelete={handleDelete} />
           </Grid>

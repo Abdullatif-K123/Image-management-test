@@ -1,5 +1,4 @@
-"use client";
-
+'use client'
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import {
@@ -8,7 +7,6 @@ import {
   Button,
   Modal,
   Box,
-  TextField,
   Snackbar,
   Alert,
   Card,
@@ -17,19 +15,21 @@ import {
   Grid,
   CardMedia,
   Stack,
+  TextField,
 } from "@mui/material";
 import { Add } from "@mui/icons-material";
 import { Delete, Edit } from "@mui/icons-material";
 import Link from 'next/link'; // Import Link from Next.js
 import { fetchCategories, createCategory, updateCategory, deleteCategory } from "@/api/api";
-import {Head} from "next/head";
+import ImageFilter from '@/components/Filter';  // Import ImageFilter
 
 export default function CategoriesPage() {
   const queryClient = useQueryClient();
 
   const [openModal, setOpenModal] = useState(false);
-  const [editMode, setEditMode] = useState(false); // for editing categories
+  const [editMode, setEditMode] = useState(false);
   const [currentCategory, setCurrentCategory] = useState({ name: "" });
+  const [selectedCategory, setSelectedCategory] = useState('');  // State for filtering categories
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -125,7 +125,6 @@ export default function CategoriesPage() {
   if (error) return <div>Error fetching categories</div>;
 
   return (
- 
     <Container>
       <Stack sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
         <Typography variant="h4" gutterBottom>
@@ -143,50 +142,60 @@ export default function CategoriesPage() {
         </Button>
       </Stack>
 
+      {/* Category Filter */}
+      <ImageFilter
+        selectedCategory={selectedCategory}
+        setSelectedCategory={setSelectedCategory}
+        categories={categories}
+        showCategoryOnly={true}  // Only show the category filter
+      />
+
       <Grid container spacing={3}>
-        {categories?.map((category) => (
+        {categories
+          ?.filter(category => !selectedCategory || category.id === selectedCategory)  // Apply the category filter
+          .map((category) => (
           <Grid item xs={12} sm={6} md={4} key={category.id}>
-           
-              <Card
-                sx={{
-                  cursor: "pointer",
-                  transition: "transform 0.3s ease",
-                  
-                  "&:hover": {
-                    transform: "scale(1.05)",
-                  },
-                  textDecoration: "none"
-                }} 
-              > <Link href={`/categories/${category.id}`} style={{textDecoration:'none', color: "#000"}} passHref>
+            <Card
+              sx={{
+                cursor: "pointer",
+                transition: "transform 0.3s ease",
+                "&:hover": {
+                  transform: "scale(1.05)",
+                },
+                textDecoration: "none",
+              }}
+            >
+              <Link href={`/categories/${category.id}`} style={{ textDecoration: 'none', color: "#000" }} passHref>
                 <CardMedia
                   component="img"
                   height="140"
                   image={category.image}
                   alt={category.name}
                 />
-                <CardContent >
-                  <Typography variant="h4" sx={{fontWeight: 600}}>{category.name}</Typography>
+                <CardContent>
+                  <Typography variant="h4" sx={{ fontWeight: 600 }}>
+                    {category.name}
+                  </Typography>
                   <Typography variant="body2">{category.description}</Typography>
                 </CardContent>
-                  </Link>
-                <CardActions>
-                  <Button size="small" onClick={() => handleEdit(category)}>
-                    Edit
-                  </Button>
-                  <Button
-                    size="small"
-                    onClick={() => handleDelete(category.id)}
-                    color="error"
-                  >
-                    Delete
-                  </Button>
-                </CardActions>
-              </Card>
+              </Link>
+              <CardActions>
+                <Button size="small" onClick={() => handleEdit(category)}>
+                  Edit
+                </Button>
+                <Button
+                  size="small"
+                  onClick={() => handleDelete(category.id)}
+                  color="error"
+                >
+                  Delete
+                </Button>
+              </CardActions>
+            </Card>
           </Grid>
         ))}
       </Grid>
 
-      {/* Modal for Adding/Editing Categories */}
       <Modal open={openModal} onClose={() => resetForm()}>
         <Box
           sx={{
@@ -223,7 +232,6 @@ export default function CategoriesPage() {
         </Box>
       </Modal>
 
-      {/* Snackbar for success/error messages */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}
@@ -234,4 +242,3 @@ export default function CategoriesPage() {
     </Container>
   );
 }
-  

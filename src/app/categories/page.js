@@ -16,6 +16,7 @@ import {
   CardMedia,
   Stack,
   TextField,
+  CircularProgress,
 } from "@mui/material";
 import { Add } from "@mui/icons-material";
 import { Delete, Edit } from "@mui/icons-material";
@@ -121,7 +122,17 @@ export default function CategoriesPage() {
     setOpenModal(false);
   };
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return  <div
+  style={{
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    height: "100vh"
+  }}
+>
+  {" "}
+  <CircularProgress />
+</div>;
   if (error) return <div>Error fetching categories</div>;
 
   return (

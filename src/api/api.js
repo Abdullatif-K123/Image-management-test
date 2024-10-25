@@ -10,9 +10,8 @@ export const fetchImages = async () => {
   return response.data;
 };
 
-export const deleteImage = async (id) => {
-    
-  await api.delete(`/images/${id}`);
+export const deleteImage = async (id) => { 
+  await api.delete(`/images/${id}`);  
 };
 
 // Simulated upload API endpoint

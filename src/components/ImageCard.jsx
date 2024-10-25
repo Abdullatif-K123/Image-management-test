@@ -15,7 +15,7 @@ import EditImageModal from "./EditModal";
 import { useState } from "react";
 import { updateImageDetails } from "@/api/api";
 import { useQueryClient } from "react-query";
-
+import Swal from "sweetalert2";
 export default function ImageCard({ image, onDelete, setSnackbar }) {
   // Local state to store the image details and ensure re-render on update
   const [imageData, setImageData] = useState(image);
@@ -90,6 +90,22 @@ export default function ImageCard({ image, onDelete, setSnackbar }) {
     month: "long", // "October"
     day: "numeric", // "21"
   });
+
+  // Handle delete with warning sweetAlert
+  const handleDelete = (id) => {
+    Swal.fire({
+      title: "Error!",
+      text: "Do you want to delete this image?",
+      icon: "warning",
+      confirmButtonText: "Delete",
+      confirmButtonColor: "red",
+      cancelButtonText: "Cancel",
+      showCancelButton: true,
+      showCloseButton: true,
+    }).then((result) => {
+      if (result.isConfirmed) onDelete(id);
+    });
+  };
   return (
     <Card sx={{ maxWidth: 345, margin: 2 }}>
       <CardMedia
@@ -122,7 +138,7 @@ export default function ImageCard({ image, onDelete, setSnackbar }) {
         {/* Delete Button */}
         <IconButton
           aria-label="delete"
-          onClick={() => onDelete(imageData.id)} // Handle delete
+          onClick={() => handleDelete(imageData.id)} // Handle delete
           color="error"
           sx={{ float: "right" }}
         >

@@ -43,6 +43,7 @@ export default function ImagesPage() {
   const [page, setPage] = useState(1); // Track the current page for infinite scrolling
   const [hasMore, setHasMore] = useState(true); // Determine if there's more data to load
   const [paginatedImages, setPaginatedImages] = useState([]); // Store paginated images
+  
 
   const {
     data: apiImages,
@@ -57,7 +58,7 @@ export default function ImagesPage() {
   // Fetch new data when the `apiImages` query updates
   useEffect(() => {
     if (apiImages && apiImages.length > 0) {
-      setPaginatedImages((prevImages) => [...prevImages, ...apiImages]); // Append new images to the existing list
+      setLocalImages((prevImages) => [...prevImages, ...apiImages]); // Append new images to the existing list
     } else {
       setHasMore(false); // No more images to load
     }
@@ -72,8 +73,8 @@ export default function ImagesPage() {
         open: true,
         message: "Image deleted successfully!",
         severity: "success",
-      });
-      setSelectedImageForEdit(null);
+      }); 
+      setLocalImages((prev) => prev.filter((image) => image.id !== deletedId));
     },
     onError: () => {
       setSnackbar({
@@ -84,9 +85,10 @@ export default function ImagesPage() {
     },
   });
 
-  const handleDelete = (id) => {
-    setLocalImages((prev) => prev.filter((image) => image.id !== id));
-    deleteMutation.mutate(id);
+  const handleDelete = async(id) => {
+    
+    await deleteMutation.mutate(id);
+   
   };
 
   const handleLocalImageUpload = (newImage) => {
@@ -112,9 +114,9 @@ export default function ImagesPage() {
 
   // Merge API images with local uploaded images
   const allImages = [...paginatedImages, ...localImages];
-
+   
   // Function to filter images based on search query, category, and metadata
-  const filteredImages = allImages.filter((image) => {
+  const filteredImages = localImages.filter((image) => {
     const matchesName = image.name
       .toLowerCase()
       .includes(searchQuery.toLowerCase());

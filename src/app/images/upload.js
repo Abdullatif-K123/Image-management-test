@@ -5,21 +5,39 @@ import { useMutation, useQuery } from 'react-query';
 import { fetchCategories, uploadImage } from '@/api/api';
 import Image from 'next/image';
 
-export default function UploadImageModal({ open, onClose, onSuccess, queryClient, onImageUpload }) {
+export default function UploadImageModal({ open, onClose, onSuccess, queryClient, onImageUpload, setSnackbar }) {
   const [imageName, setImageName] = useState('');
   const [category, setCategory] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
+  const [loading, setLoading] = useState(false);
  
   // Fetch categories using React Query
   const { data: categories, isLoading, error } = useQuery('categories', fetchCategories);
 
+
+  
+  const mutation = useMutation(uploadImage, {
+    onSuccess: () => {
+      // Invalidate and refetch the images list to update the UI
+      queryClient.invalidateQueries('images');
+      console.log("Hello")
+      setSnackbar({
+        open: true,
+        message: "Image added successfully!",
+        severity: "success",
+      }); 
+      onClose(); 
+      resetForm();
+      setLoading(false);
+    },
+  });
   const handleUpload = (e) => {
     e.preventDefault();
     if (!selectedFile || !imageName || !category) {
       alert('Please fill all fields!');
       return;
     }
-
+    setLoading(true);
     const newImage = {
       id: Date.now(),  // Simulated ID (since we don't have an actual backend)
       name: imageName,
@@ -29,10 +47,9 @@ export default function UploadImageModal({ open, onClose, onSuccess, queryClient
     };
 
     // Simulate successful upload by calling onImageUpload
+    mutation.mutate(newImage);
     onImageUpload(newImage);  // Add new image to local state
-    onClose();  // Close the modal
-    onSuccess('Image uploaded successfully!');
-    resetForm();  // Clear form fields
+    
   };
   // handling uploading img file
   const handleFileChange = (e) => {
@@ -114,7 +131,7 @@ export default function UploadImageModal({ open, onClose, onSuccess, queryClient
                 )}
             </CardContent>
         </Card>
-          <Button type="submit" variant="contained" color="primary" fullWidth>
+          <Button type="submit" disabled={loading} variant="contained" color="primary" fullWidth>
             Upload
           </Button>
         </form>

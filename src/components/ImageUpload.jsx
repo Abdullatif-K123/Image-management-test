@@ -1,21 +1,28 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useMutation, useQueryClient } from 'react-query';
-import { Button, TextField, Input, MenuItem, Select, FormControl, InputLabel } from '@mui/material';
-import { uploadImage } from '@/api/api';
-
+import { useState } from "react";
+import { useMutation, useQueryClient } from "react-query";
+import {
+  Button,
+  TextField,
+  Input,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+} from "@mui/material";
+import { uploadImage } from "@/api/api";
 
 export default function ImageUpload({ categories }) {
   const queryClient = useQueryClient();
   const [selectedFile, setSelectedFile] = useState(null);
-  const [imageName, setImageName] = useState('');
-  const [category, setCategory] = useState('');
+  const [imageName, setImageName] = useState("");
+  const [category, setCategory] = useState("");
 
   const mutation = useMutation(uploadImage, {
     onSuccess: () => {
       // Invalidate and refetch the images list to update the UI
-      queryClient.invalidateQueries('images');
+      queryClient.invalidateQueries("images");
     },
   });
 
@@ -26,7 +33,7 @@ export default function ImageUpload({ categories }) {
   const handleUpload = (e) => {
     e.preventDefault();
     if (!selectedFile || !imageName || !category) {
-      alert('Please fill all fields!');
+      alert("Please fill all fields!");
       return;
     }
 
@@ -61,7 +68,12 @@ export default function ImageUpload({ categories }) {
           ))}
         </Select>
       </FormControl>
-      <Input type="file" onChange={handleFileChange} fullWidth margin="normal" />
+      <Input
+        type="file"
+        onChange={handleFileChange}
+        fullWidth
+        margin="normal"
+      />
       <Button type="submit" variant="contained" color="primary" fullWidth>
         Upload Image
       </Button>

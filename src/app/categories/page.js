@@ -23,6 +23,7 @@ import { Delete, Edit } from "@mui/icons-material";
 import Link from 'next/link'; // Import Link from Next.js
 import { fetchCategories, createCategory, updateCategory, deleteCategory } from "@/api/api";
 import ImageFilter from '@/components/Filter';  // Import ImageFilter
+import Swal from "sweetalert2";
 
 export default function CategoriesPage() {
   const queryClient = useQueryClient();
@@ -107,7 +108,19 @@ export default function CategoriesPage() {
   };
 
   const handleDelete = (id) => {
-    deleteMutation.mutate(id);
+    Swal.fire({
+      title: "Error!",
+      text: "Do you want to delete this category?",
+      icon: "warning",
+      confirmButtonText: "Delete",
+      confirmButtonColor: "red",
+      cancelButtonText: "Cancel",
+      showCancelButton: true,
+      showCloseButton: true,
+    }).then((result) => {
+      if (result.isConfirmed) deleteMutation.mutate(id);;
+    });
+    
   };
 
   const handleEdit = (category) => {
@@ -192,14 +205,14 @@ export default function CategoriesPage() {
               </Link>
               <CardActions>
                 <Button size="small" onClick={() => handleEdit(category)}>
-                  Edit
+                  Edit <Edit/>
                 </Button>
                 <Button
                   size="small"
                   onClick={() => handleDelete(category.id)}
                   color="error"
                 >
-                  Delete
+                  Delete <Delete/>
                 </Button>
               </CardActions>
             </Card>

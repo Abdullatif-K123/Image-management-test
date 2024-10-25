@@ -92,6 +92,7 @@ export default function ImagesPage() {
   };
 
   const handleLocalImageUpload = (newImage) => {
+    console.log(newImage)
     setLocalImages((prevImages) => [...prevImages, newImage]);
   };
 
@@ -114,15 +115,16 @@ export default function ImagesPage() {
 
   // Merge API images with local uploaded images
   const allImages = [...paginatedImages, ...localImages];
-   
+    console.log(localImages)
   // Function to filter images based on search query, category, and metadata
   const filteredImages = localImages.filter((image) => {
-    const matchesName = image.name
+    console.log(image)
+    const matchesName = image??  image.name
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
     const matchesCategory =
       selectedCategory === "" || image.categoryId === selectedCategory;
-    const matchesMetadata = image.metadata.size.includes(metadataFilter);
+    const matchesMetadata =image?? image.metadata.size.includes(metadataFilter);
     return matchesName && matchesCategory && matchesMetadata;
   });
 
@@ -231,7 +233,9 @@ export default function ImagesPage() {
         open={openModal}
         onClose={() => setOpenModal(false)}
         onSuccess={handleLocalImageUpload}
+        onImageUpload={handleLocalImageUpload}
         queryClient={queryClient}
+        setSnackbar={setSnackbar}
       />
     </Container>
   );
